@@ -111,11 +111,11 @@ public abstract class RouteOptions extends DirectionsJsonObject {
   /**
    * The same radiuses were used during the request that resulted in this root directions response.
    *
-   * @return a string representing the radiuses
+   * @return a list of radiuses
    * @since 3.0.0
    */
   @Nullable
-  public abstract String radiuses();
+  public abstract List<Double> radiuses();
 
   /**
    * The same bearings which were used during the request that resulted in this root directions
@@ -126,7 +126,7 @@ public abstract class RouteOptions extends DirectionsJsonObject {
    * @since 3.0.0
    */
   @Nullable
-  public abstract String bearings();
+  public abstract List<List<Double>> bearings();
 
   /**
    * The same continueStraight setting which was used during the request that resulted in this root
@@ -261,12 +261,12 @@ public abstract class RouteOptions extends DirectionsJsonObject {
    * If provided, the list of approaches must be the same length as the list of waypoints.
    * However, you can skip a coordinate and show its position in the list with the ; separator.
    *
-   * @return a string representing approaches for each waypoint
+   * @return a list of strings representing approaches for each waypoint
    * @since 3.2.0
    */
 
   @Nullable
-  public abstract String approaches();
+  public abstract List<String> approaches();
 
   /**
    * Indicates which input coordinates should be treated as waypoints.
@@ -277,24 +277,24 @@ public abstract class RouteOptions extends DirectionsJsonObject {
    * {@link #steps()}
    * </p>
    *
-   * @return a string representing indices to be used as waypoints
+   * @return a List of Integers representing indices to be used as waypoints
    * @since 4.4.0
    */
   @SerializedName("waypoints")
   @Nullable
-  public abstract String waypointIndices();
+  public abstract List<Integer> waypointIndices();
 
   /**
    * Custom names for waypoints used for the arrival instruction in banners and voice instructions,
    * each separated by  ; . Values can be any string and total number of all characters cannot
    * exceed 500. If provided, the list of waypoint_names must be the same length as the list of
    * coordinates, but you can skip a coordinate and show its position with the ; separator.
-   * @return  a string representing names for each waypoint
+   * @return  a list of strings representing names for each waypoint
    * @since 3.3.0
    */
   @SerializedName("waypoint_names")
   @Nullable
-  public abstract String waypointNames();
+  public abstract List<String> waypointNames();
 
 
   /**
@@ -306,12 +306,12 @@ public abstract class RouteOptions extends DirectionsJsonObject {
    * side of street. The number of waypoint targets must be the same as the number of coordinates,
    * but you can skip a coordinate pair and show its position in the list with the ; separator.
    * Must be used with steps=true.
-   * @return  a string representing coordinate pairs for drop-off locations
+   * @return  a list of Points representing coordinate pairs for drop-off locations
    * @since 4.3.0
    */
   @SerializedName("waypoint_targets")
   @Nullable
-  public abstract String waypointTargets();
+  public abstract List<Point> waypointTargets();
 
   /**
    * To be used to specify settings for use with the walking profile.
@@ -323,28 +323,28 @@ public abstract class RouteOptions extends DirectionsJsonObject {
   public abstract WalkingOptions walkingOptions();
 
   /**
-   * A semicolon-separated list of coordinates corresponding to locations leading up to the origin
+   * A list of coordinates corresponding to locations leading up to the origin
    * in the Directions API request.
    */
   @SerializedName("origin_trace")
   @Nullable
-  public abstract String originTrace();
+  public abstract List<Point> originTrace();
 
   /**
-   * A semicolon-separated list of radius values corresponding to the accuracy of the origin_trace
+   * A list of radius values corresponding to the accuracy of the origin_trace
    * locations.
    */
   @SerializedName("origin_trace_radiuses")
   @Nullable
-  public abstract String originTraceRadiuses();
+  public abstract List<Integer> originTraceRadiuses();
 
   /**
-   * A semicolon-separated list of timestamp values corresponding to timestamps of the origin_trace
+   * A list of timestamp values corresponding to timestamps of the origin_trace
    * locations.
    */
   @Nullable
   @SerializedName("origin_trace_timestamps")
-  public abstract String originTraceTimestamps();
+  public abstract List<Long> originTraceTimestamps();
 
   /**
    * Gson type adapter for parsing Gson to this class.
@@ -455,21 +455,21 @@ public abstract class RouteOptions extends DirectionsJsonObject {
     /**
      * The radiuses in string format that were used during the original request.
      *
-     * @param radiuses radiuses values separated by comma
+     * @param radiuses a list of radius values
      * @return this builder for chaining options together
      * @since 3.0.0
      */
-    public abstract Builder radiuses(String radiuses);
+    public abstract Builder radiuses(List<Double> radiuses);
 
     /**
      * The bearing values the user used for the original request which resulted in this response.
      * It is best to recalculate these values since they are probably outdated already.
      *
-     * @param bearings number values representing the bearings separated by commas
+     * @param bearings List of list on doubles representing bearings
      * @return this builder for chaining options together
      * @since 3.0.0
      */
-    public abstract Builder bearings(String bearings);
+    public abstract Builder bearings(List<List<Double>> bearings);
 
     /**
      * Whether the original request wanted continueStraight enabled or not.
@@ -594,11 +594,11 @@ public abstract class RouteOptions extends DirectionsJsonObject {
     /**
      * The same approaches the user originally made when the request was made.
      *
-     * @param approaches unrestricted, curb or omitted (;)
+     * @param approaches a list of Strings
      * @return this builder for chaining options together
      * @since 3.2.0
      */
-    public abstract Builder approaches(String approaches);
+    public abstract Builder approaches(List<String> approaches);
 
     /**
      * The same waypoint indices the user originally made when the request was made.
@@ -607,25 +607,25 @@ public abstract class RouteOptions extends DirectionsJsonObject {
      * @return this builder for chaining options together
      * @since 4.4.0
      */
-    public abstract Builder waypointIndices(@Nullable String indices);
+    public abstract Builder waypointIndices(@Nullable List<Integer> indices);
 
     /**
      * The same waypoint names the user originally made when the request was made.
      *
-     * @param waypointNames unrestricted, curb or omitted (;)
+     * @param waypointNames a list of Strings
      * @return this builder for chaining options together
      * @since 3.3.0
      */
-    public abstract Builder waypointNames(@Nullable String waypointNames);
+    public abstract Builder waypointNames(@Nullable List<String> waypointNames);
 
     /**
      * The same waypoint targets the user originally made when the request was made.
      *
-     * @param waypointTargets list of coordinate pairs for drop-off locations (;)
+     * @param waypointTargets list of Points for drop-off locations
      * @return this builder for chaining options together
      * @since 4.3.0
      */
-    public abstract Builder waypointTargets(@Nullable String waypointTargets);
+    public abstract Builder waypointTargets(@Nullable List<Point> waypointTargets);
 
     /**
      * To be used to specify settings for use with the walking profile.
@@ -644,7 +644,7 @@ public abstract class RouteOptions extends DirectionsJsonObject {
      *                    in the Directions API request
      * @return this builder for chaining options together
      */
-    public abstract Builder originTrace(@NonNull String originTrace);
+    public abstract Builder originTrace(@NonNull List<Point> originTrace);
 
     /**
      * The origin_trace_radiuses query parameter is a list of radius values corresponding to the
@@ -654,7 +654,7 @@ public abstract class RouteOptions extends DirectionsJsonObject {
      *                            origin_trace locations
      * @return this builder for chaining options together
      */
-    public abstract Builder originTraceRadiuses(@NonNull String originTraceRadiuses);
+    public abstract Builder originTraceRadiuses(@NonNull List<Integer> originTraceRadiuses);
 
     /**
      * The origin_trace_timestamps query parameter is a list of timestamp values corresponding to
@@ -664,7 +664,7 @@ public abstract class RouteOptions extends DirectionsJsonObject {
      *                              origin_trace locations
      * @return this builder for chaining options together
      */
-    public abstract Builder originTraceTimestamps(@NonNull String originTraceTimestamps);
+    public abstract Builder originTraceTimestamps(@NonNull List<Long> originTraceTimestamps);
 
     /**
      * Builds a new instance of the {@link RouteOptions} object.

@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.DestinationCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.GeometriesCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.OverviewCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.ProfileCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.optimization.v1.models.OptimizationAdapterFactory;
 import com.mapbox.api.optimization.v1.models.OptimizationResponse;
 import com.mapbox.core.MapboxService;
@@ -24,6 +25,7 @@ import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -158,7 +160,7 @@ public abstract class MapboxOptimization
   public abstract static class Builder {
 
     private List<Integer[]> distributions = new ArrayList<>();
-    private List<Double[]> bearings = new ArrayList<>();
+    private List<List<Double>> bearings = new ArrayList<>();
     private List<Point> coordinates = new ArrayList<>();
     private String[] annotations;
     private double[] radiuses;
@@ -339,7 +341,7 @@ public abstract class MapboxOptimization
      */
     public Builder bearing(@Nullable @FloatRange(from = 0, to = 360) Double angle,
                            @Nullable @FloatRange(from = 0, to = 360) Double tolerance) {
-      bearings.add(new Double[] {angle, tolerance});
+      bearings.add(Arrays.asList(angle, tolerance));
       return this;
     }
 

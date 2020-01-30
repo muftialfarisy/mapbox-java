@@ -1,5 +1,6 @@
 package com.mapbox.api.matching.v5;
 
+import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.matching.v5.models.MapMatchingMatching;
 import com.mapbox.api.matching.v5.models.MapMatchingResponse;
@@ -58,9 +59,9 @@ class MatchingResponseFactory {
           .profile(mapboxMapMatching.profile())
           .coordinates(formatCoordinates(mapboxMapMatching.coordinates()))
           .annotations(mapboxMapMatching.annotations())
-          .approaches(mapboxMapMatching.approaches())
+          .approaches(MapboxDirections.parseToStrings(mapboxMapMatching.approaches()))
           .language(mapboxMapMatching.language())
-          .radiuses(mapboxMapMatching.radiuses())
+          .radiuses(MapboxDirections.parseToDoubles(mapboxMapMatching.radiuses()))
           .user(mapboxMapMatching.user())
           .voiceInstructions(mapboxMapMatching.voiceInstructions())
           .bannerInstructions(mapboxMapMatching.bannerInstructions())
@@ -71,9 +72,8 @@ class MatchingResponseFactory {
           .voiceUnits(mapboxMapMatching.voiceUnits())
           .requestUuid(PLACEHOLDER_UUID)
           .accessToken(mapboxMapMatching.accessToken())
-          .approaches(mapboxMapMatching.approaches())
-          .waypointIndices(mapboxMapMatching.waypointIndices())
-          .waypointNames(mapboxMapMatching.waypointNames())
+          .waypointIndices(MapboxDirections.parseToIntegers(mapboxMapMatching.waypointIndices()))
+          .waypointNames(MapboxDirections.parseToStrings(mapboxMapMatching.waypointNames()))
           .baseUrl(mapboxMapMatching.baseUrl())
           .build()
       ).build());

@@ -599,7 +599,8 @@ public class MapboxMapMatchingTest extends TestUtils {
     Response<MapMatchingResponse> response = mapMatching.executeCall();
     RouteOptions routeOptions = response.body().matchings().get(0).routeOptions();
 
-    assertEquals("unrestricted;curb", routeOptions.approaches());
+    assertEquals("unrestricted", routeOptions.approaches().get(0));
+    assertEquals("curb", routeOptions.approaches().get(1));
   }
 
   @Test

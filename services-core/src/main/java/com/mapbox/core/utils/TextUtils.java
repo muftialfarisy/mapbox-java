@@ -58,6 +58,21 @@ public final class TextUtils {
   }
 
   /**
+   * Returns a string containing the tokens joined by delimiters.
+   *
+   * @param delimiter the delimiter on which to split.
+   * @param tokens    A list of objects to be joined. Strings will be formed from the objects by
+   *                  calling object.toString().
+   * @return {@link String}
+   */
+  public static String join(CharSequence delimiter, List<?> tokens) {
+    if (tokens == null || tokens.size() < 1) {
+      return null;
+    }
+    return join(delimiter, tokens.toArray());
+  }
+
+  /**
    * Useful to remove any trailing zeros and prevent a coordinate being over 7 significant figures.
    *
    * @param coordinate a double value representing a coordinate.
@@ -111,27 +126,44 @@ public final class TextUtils {
     return join(";", radiusesFormatted);
   }
 
+  public static String formatRadiuses(List<Double> radiuses) {
+    if (radiuses == null || radiuses.size() == 0) {
+      return null;
+    }
+
+    String[] radiusesFormatted = new String[radiuses.size()];
+    for (int i = 0; i < radiuses.size(); i++) {
+      if (radiuses.get(i) == Double.POSITIVE_INFINITY) {
+        radiusesFormatted[i] = "unlimited";
+      } else {
+        radiusesFormatted[i] = String.format(Locale.US, "%s",
+                TextUtils.formatCoordinate(radiuses.get(i)));
+      }
+    }
+    return join(";", radiusesFormatted);
+  }
+
   /**
    * Formats the bearing variables from the raw values to a string which can than be used for the
    * request URL.
    *
-   * @param bearings a List of doubles representing bearing values
+   * @param bearings a List of list of doubles representing bearing values
    * @return a string with the bearing values
    * @since 3.0.0
    */
-  public static String formatBearing(List<Double[]> bearings) {
+  public static String formatBearing(List<List<Double>> bearings) {
     if (bearings.isEmpty()) {
       return null;
     }
 
     String[] bearingFormatted = new String[bearings.size()];
     for (int i = 0; i < bearings.size(); i++) {
-      if (bearings.get(i).length == 0) {
+      if (bearings.get(i).size() == 0) {
         bearingFormatted[i] = "";
       } else {
         bearingFormatted[i] = String.format(Locale.US, "%s,%s",
-          TextUtils.formatCoordinate(bearings.get(i)[0]),
-          TextUtils.formatCoordinate(bearings.get(i)[1]));
+                TextUtils.formatCoordinate(bearings.get(i).get(0)),
+                TextUtils.formatCoordinate(bearings.get(i).get(1)));
       }
     }
     return TextUtils.join(";", bearingFormatted);
@@ -171,12 +203,12 @@ public final class TextUtils {
    * @return a formatted string.
    * @since 3.2.0
    */
-  public static String formatApproaches(String[] approaches) {
-    for (int i = 0; i < approaches.length; i++) {
-      if (approaches[i] == null) {
-        approaches[i] = "";
-      } else if (!approaches[i].equals("unrestricted")
-        && !approaches[i].equals("curb") && !approaches[i].isEmpty()) {
+  public static String formatApproaches(List<String> approaches) {
+    for (int i = 0; i < approaches.size(); i++) {
+      if (approaches.get(i) == null) {
+        approaches.set(i, "");
+      } else if (!approaches.get(i).equals("unrestricted")
+        && !approaches.get(i).equals("curb") && !approaches.get(i).isEmpty()) {
         return null;
       }
     }
@@ -191,10 +223,10 @@ public final class TextUtils {
    * @return a formatted string.
    * @since 3.3.0
    */
-  public static String formatWaypointNames(String[] waypointNames) {
-    for (int i = 0; i < waypointNames.length; i++) {
-      if (waypointNames[i] == null) {
-        waypointNames[i] = "";
+  public static String formatWaypointNames(List<String> waypointNames) {
+    for (int i = 0; i < waypointNames.size(); i++) {
+      if (waypointNames.get(i) == null) {
+        waypointNames.set(i, "");
       }
     }
     return TextUtils.join(";", waypointNames);

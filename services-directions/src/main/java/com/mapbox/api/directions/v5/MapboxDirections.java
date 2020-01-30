@@ -25,6 +25,7 @@ import com.mapbox.geojson.Point;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -244,8 +245,8 @@ public abstract class MapboxDirections extends
    * @return a formatted string.
    * @since 4.3.0
    */
-  private static String formatPointsArray(Point[] points) {
-    String[] coordinatesFormatted = new String[points.length];
+  private static String formatPointsList(List<Point> points) {
+    String[] coordinatesFormatted = new String[points.size()];
     int index = 0;
     for (Point target : points) {
       if (target == null) {
@@ -431,19 +432,19 @@ public abstract class MapboxDirections extends
   @AutoValue.Builder
   public abstract static class Builder {
 
-    private List<Double[]> bearings = new ArrayList<>();
+    private List<List<Double>> bearings = new ArrayList<>();
     private List<Point> coordinates = new ArrayList<>();
-    private String[] annotations;
-    private double[] radiuses;
+    private List<String> annotations = new ArrayList<>();
+    private List<Double> radiuses = new ArrayList<>();
     private Point destination;
     private Point origin;
-    private String[] approaches;
-    private Integer[] waypointIndices;
-    private String[] waypointNames;
-    private Point[] waypointTargets;
-    private Point[] originTrace;
-    private Integer[] originTraceRadiuses;
-    private Long[] originTraceTimestamps;
+    private List<String> approaches = new ArrayList<>();
+    private List<Integer> waypointIndices = new ArrayList<>();
+    private List<String> waypointNames = new ArrayList<>();
+    private List<Point> waypointTargets = new ArrayList<>();
+    private List<Point> originTrace = new ArrayList<>();
+    private List<Integer> originTraceRadiuses = new ArrayList<>();
+    private List<Long> originTraceTimestamps = new ArrayList<>();
 
     /**
      * The username for the account that the directions engine runs on. In most cases, this should
@@ -508,6 +509,22 @@ public abstract class MapboxDirections extends
      */
     public Builder addWaypoint(@NonNull Point waypoint) {
       coordinates.add(waypoint);
+      return this;
+    }
+
+    /**
+     * This can be used to set up to 23 additional in-between points which will act as pit-stops
+     * along the users route. Note that if you are using the
+     * {@link DirectionsCriteria#PROFILE_DRIVING_TRAFFIC} that the max number of waypoints allowed
+     * in the request is currently limited to 1.
+     *
+     * @param waypoints a list which represents the pit-stops or waypoints where
+     *                  you'd like one of the {@link RouteLeg} to
+     *                  navigate the user to
+     * @return this builder for chaining options together
+     */
+    public Builder waypoints(@NonNull List<Point> waypoints) {
+      coordinates = waypoints;
       return this;
     }
 
@@ -627,7 +644,12 @@ public abstract class MapboxDirections extends
      * documentation</a>
      * @since 2.1.0
      */
-    public Builder annotations(@Nullable @AnnotationCriteria String... annotations) {
+    public Builder annotations(@AnnotationCriteria @NonNull String... annotations) {
+      this.annotations.addAll(Arrays.asList(annotations));
+      return this;
+    }
+
+    public Builder annotations(@NonNull List<String> annotations) {
       this.annotations = annotations;
       return this;
     }
@@ -637,7 +659,7 @@ public abstract class MapboxDirections extends
     /**
      * Optionally, Use to filter the road segment the waypoint will be placed on by direction and
      * dictates the angle of approach. This option should always be used in conjunction with the
-     * {@link #radiuses(double...)} parameter.
+     * {@link #radiuses} parameter.
      * <p>
      * The parameter takes two values per waypoint: the first is an angle clockwise from true north
      * between 0 and 360. The second is the range of degrees the angle can deviate by. We recommend
@@ -665,10 +687,32 @@ public abstract class MapboxDirections extends
     public Builder addBearing(@Nullable @FloatRange(from = 0, to = 360) Double angle,
                               @Nullable @FloatRange(from = 0, to = 360) Double tolerance) {
       if (angle == null || tolerance == null) {
-        bearings.add(new Double[0]);
+        bearings.add(new ArrayList<Double>());
       } else {
-        bearings.add(new Double[] {angle, tolerance});
+        bearings.add(Arrays.asList(angle, tolerance));
       }
+      return this;
+    }
+
+    public Builder bearings(@NonNull List<List<Double>> bearings) {
+      List<List<Double>> newBearings = new ArrayList<>();
+      for (List<Double> bearing : bearings) {
+        if (bearing.size() != 2) {
+          throw new ServicesException("Bearing size should be 2.");
+        }
+        Double angle = bearing.get(0);
+        Double tolerance = bearing.get(1);
+        if (angle == null || tolerance == null) {
+          newBearings.add(new ArrayList<Double>());
+        } else {
+          if (angle < 0 || angle > 360 || tolerance < 0 || tolerance > 360) {
+            throw new ServicesException("Angle and tolerance have to be from 0 to 360.");
+          }
+          newBearings.add(Arrays.asList(angle, tolerance));
+        }
+      }
+
+      this.bearings = newBearings;
       return this;
     }
 
@@ -687,7 +731,12 @@ public abstract class MapboxDirections extends
      * @return this builder for chaining options together
      * @since 1.0.0
      */
-    public Builder radiuses(@FloatRange(from = 0) double... radiuses) {
+    public Builder radiuses(@NonNull @FloatRange(from = 0) Double... radiuses) {
+      this.radiuses.addAll(Arrays.asList(radiuses));
+      return this;
+    }
+
+    public Builder radiuses(@NonNull List<Double> radiuses) {
       this.radiuses = radiuses;
       return this;
     }
@@ -811,7 +860,12 @@ public abstract class MapboxDirections extends
      * @return this builder for chaining options together
      * @since 3.2.0
      */
-    public Builder addApproaches(String... approaches) {
+    public Builder addApproaches(@NonNull String... approaches) {
+      this.approaches.addAll(Arrays.asList(approaches));
+      return this;
+    }
+
+    public Builder addApproaches(@NonNull List<String> approaches) {
       this.approaches = approaches;
       return this;
     }
@@ -832,7 +886,12 @@ public abstract class MapboxDirections extends
      * @return this builder for chaining options together
      * @since 4.4.0
      */
-    public Builder addWaypointIndices(@Nullable @IntRange(from = 0) Integer... waypointIndices) {
+    public Builder addWaypointIndices(@NonNull @IntRange(from = 0) Integer... waypointIndices) {
+      this.waypointIndices.addAll(Arrays.asList(waypointIndices));
+      return this;
+    }
+
+    public Builder waypointIndices(@NonNull List<Integer> waypointIndices) {
       this.waypointIndices = waypointIndices;
       return this;
     }
@@ -849,7 +908,12 @@ public abstract class MapboxDirections extends
      * @return this builder for chaining options together
      * @since 3.3.0
      */
-    public Builder addWaypointNames(@Nullable String... waypointNames) {
+    public Builder addWaypointNames(@NonNull String... waypointNames) {
+      this.waypointNames.addAll(Arrays.asList(waypointNames));
+      return this;
+    }
+
+    public Builder waypointNames(@NonNull List<String> waypointNames) {
       this.waypointNames = waypointNames;
       return this;
     }
@@ -867,7 +931,12 @@ public abstract class MapboxDirections extends
      * @return this builder for chaining options together
      * @since 4.3.0
      */
-    public Builder addWaypointTargets(@Nullable Point... waypointTargets) {
+    public Builder addWaypointTargets(@NonNull Point... waypointTargets) {
+      this.waypointTargets.addAll(Arrays.asList(waypointTargets));
+      return this;
+    }
+
+    public Builder waypointTargets(@NonNull List<Point> waypointTargets) {
       this.waypointTargets = waypointTargets;
       return this;
     }
@@ -928,7 +997,12 @@ public abstract class MapboxDirections extends
      * @param originTrace list of coordinates corresponding to locations leading up to the origin
      * @return this builder for chaining options together
      */
-    public Builder addOriginTrace(@Nullable Point... originTrace) {
+    public Builder addOriginTrace(@NonNull Point... originTrace) {
+      this.originTrace.addAll(Arrays.asList(originTrace));
+      return this;
+    }
+
+    public Builder originTraces(@NonNull List<Point> originTrace) {
       this.originTrace = originTrace;
       return this;
     }
@@ -943,7 +1017,12 @@ public abstract class MapboxDirections extends
      *                            origin_trace locations
      * @return this builder for chaining options together
      */
-    public Builder addOriginTraceRadiuses(@Nullable Integer... originTraceRadiuses) {
+    public Builder addOriginTraceRadiuses(@NonNull Integer... originTraceRadiuses) {
+      this.originTraceRadiuses.addAll(Arrays.asList(originTraceRadiuses));
+      return this;
+    }
+
+    public Builder addOriginTraceRadiuses(@NonNull List<Integer> originTraceRadiuses) {
       this.originTraceRadiuses = originTraceRadiuses;
       return this;
     }
@@ -958,7 +1037,12 @@ public abstract class MapboxDirections extends
      *                              origin_trace locations
      * @return this builder for chaining options together
      */
-    public Builder addOriginTraceTimestamps(@Nullable Long... originTraceTimestamps) {
+    public Builder addOriginTraceTimestamps(@NonNull Long... originTraceTimestamps) {
+      this.originTraceTimestamps.addAll(Arrays.asList(originTraceTimestamps));
+      return this;
+    }
+
+    public Builder addOriginTraceTimestamps(@NonNull List<Long> originTraceTimestamps) {
       this.originTraceTimestamps = originTraceTimestamps;
       return this;
     }
@@ -986,41 +1070,41 @@ public abstract class MapboxDirections extends
           + " directions API request.");
       }
 
-      if (waypointIndices != null) {
-        if (waypointIndices.length < 2) {
+      if (!waypointIndices.isEmpty()) {
+        if (waypointIndices.size() < 2) {
           throw new ServicesException(
             "Waypoints must be a list of at least two indexes separated by ';'");
         }
-        if (waypointIndices[0] != 0 || waypointIndices[waypointIndices.length - 1]
+        if (waypointIndices.get(0) != 0 || waypointIndices.get(waypointIndices.size() - 1)
           != coordinates.size() - 1) {
           throw new ServicesException(
             "Waypoints must contain indices of the first and last coordinates"
           );
         }
-        for (int i = 1; i < waypointIndices.length - 1; i++) {
-          if (waypointIndices[i] < 0 || waypointIndices[i] >= coordinates.size()) {
+        for (int i = 1; i < waypointIndices.size() - 1; i++) {
+          if (waypointIndices.get(i) < 0 || waypointIndices.get(i) >= coordinates.size()) {
             throw new ServicesException(
               "Waypoints index too large (no corresponding coordinate)");
           }
         }
       }
 
-      if (waypointNames != null) {
+      if (!waypointNames.isEmpty()) {
         final String waypointNamesStr = TextUtils.formatWaypointNames(waypointNames);
         waypointNames(waypointNamesStr);
       }
 
-      if (waypointTargets != null) {
-        if (waypointTargets.length != coordinates.size()) {
+      if (!waypointTargets.isEmpty()) {
+        if (waypointTargets.size() != coordinates.size()) {
           throw new ServicesException("Number of waypoint targets must match "
             + " the number of waypoints provided.");
         }
 
-        waypointTargets(formatPointsArray(waypointTargets));
+        waypointTargets(formatPointsList(waypointTargets));
       }
 
-      if (approaches != null) {
-        if (approaches.length != coordinates.size()) {
+      if (!approaches.isEmpty()) {
+        if (approaches.size() != coordinates.size()) {
           throw new ServicesException("Number of approach elements must match "
             + "number of coordinates provided.");
         }
@@ -1031,24 +1115,24 @@ public abstract class MapboxDirections extends
         approaches(formattedApproaches);
       }
 
-      if (originTrace != null && originTraceRadiuses != null && originTraceTimestamps != null) {
-        if (originTrace.length != originTraceRadiuses.length
-          || originTrace.length != originTraceTimestamps.length) {
+      if (!originTrace.isEmpty() && !originTraceRadiuses.isEmpty() && !originTraceTimestamps.isEmpty()) {
+        if (originTrace.size() != originTraceRadiuses.size()
+          || originTrace.size() != originTraceTimestamps.size()) {
           throw new ServicesException("originTrace, originTraceRadiuses and "
             + "originTraceTimestamps must have the same size.");
         }
 
-        if (originTrace.length < 2 || originTrace.length > 20) {
+        if (originTrace.size() < 2 || originTrace.size() > 20) {
           throw new ServicesException("originTrace, originTraceRadiuses and "
             + "originTraceTimestamps must be from 2 to 20 items.");
         }
 
-        originTrace(formatPointsArray(originTrace));
+        originTrace(formatPointsList(originTrace));
         originTraceRadiuses(TextUtils.join(";", originTraceRadiuses));
         originTraceTimestamps(TextUtils.join(";", originTraceTimestamps));
 
-      } else if (originTrace == null && originTraceRadiuses == null
-          && originTraceTimestamps == null) {
+      } else if (originTrace.isEmpty() && originTraceRadiuses.isEmpty()
+          && originTraceTimestamps.isEmpty()) {
             // do nothing, skip Map Matching params
       } else {
         throw new ServicesException("originTrace, originTraceRadiuses and originTraceTimestamps "
@@ -1069,5 +1153,97 @@ public abstract class MapboxDirections extends
       }
       return directions;
     }
+  }
+
+  private static final String SEMICOLON = ";";
+  private static final String COMMA = ",";
+
+  public static List<Integer> parseToIntegers(String original) {
+    List<Integer> integers = new ArrayList<>();
+    if (original != null) {
+      String[] strings = original.split(SEMICOLON);
+      for (String index : strings) {
+        if (index != null && !index.isEmpty()) {
+          integers.add(Integer.valueOf(index));
+        }
+      }
+    }
+
+    return integers;
+  }
+
+  public static List<String> parseToStrings(String original) {
+    List<String> strings = new ArrayList<>();
+    if (original != null) {
+      String[] values = original.split(SEMICOLON);
+      for (String name : values) {
+        if (name != null && !name.isEmpty()) {
+          strings.add(name);
+        }
+      }
+    }
+
+    return strings;
+  }
+
+  public static List<Point> parseToPoints(String original) {
+    List<Point> points = new ArrayList<>();
+    if (original != null) {
+      String[] targets = original.split(SEMICOLON);
+      for (String target : targets) {
+        if (target != null && !target.isEmpty()) {
+            String[] point = target.split(COMMA);
+            points.add(Point.fromLngLat(Double.valueOf(point[0]), Double.valueOf(point[1])));
+        }
+      }
+    }
+
+    return points;
+  }
+
+  public static List<Double> parseToDoubles(String original) {
+    List<Double> doubles = new ArrayList<>();
+
+    if (original != null) {
+      String[] array = original.split(SEMICOLON);
+      for (String radius : array) {
+        if (radius != null && !radius.isEmpty()) {
+          doubles.add(Double.valueOf(radius));
+        }
+      }
+    }
+
+    return doubles;
+  }
+
+  public static List<Long> parseToLongs(String original) {
+    List<Long> longs = new ArrayList<>();
+
+    if (original != null) {
+      String[] array = original.split(SEMICOLON);
+      for (String radius : array) {
+        if (radius != null && !radius.isEmpty()) {
+          longs.add(Long.valueOf(radius));
+        }
+      }
+    }
+
+    return longs;
+  }
+
+  public static List<List<Double>> parseToListOfListOfDoubles(String original) {
+    List<List<Double>> result = new ArrayList<>();
+
+    if (original != null && !original.isEmpty()) {
+      String[] pairs = original.split(SEMICOLON);
+      for (String pair : pairs) {
+          String[] values = pair.split(COMMA);
+          if (values.length == 2) {
+              result.add(Arrays.asList(Double.valueOf(values[0]), Double.valueOf(values[1])));
+          }
+      }
+    }
+
+    return result;
   }
 }
